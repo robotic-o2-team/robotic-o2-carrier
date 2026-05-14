@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robotic O₂ Generator Carrier — Week 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #fafafa;
+    --coral: #e8543e;
+    --coral-dim: #c4432f;
+    --gray: #888;
+    --light-gray: #bbb;
+    --card-bg: #161616;
+    --green: #2da44e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--black);
+    font-family: 'Inter', sans-serif;
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    width: 100%; height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateY(20px);
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .slide.dark { background: var(--black); color: var(--white); }
+  .slide.light { background: var(--white); color: var(--black); }
+  .slide.coral-bg { background: var(--coral); color: var(--white); }
+
+  /* Typography */
+  .tag {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.6rem, 1vw, 0.8rem);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 1.2em;
+  }
+  .slide.coral-bg .tag { color: rgba(0,0,0,0.5); }
+
+  .mega {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5.5vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+
+  .big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .medium {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    line-height: 1.3;
+  }
+
+  .body {
+    font-size: clamp(0.8rem, 1.3vw, 1.05rem);
+    line-height: 1.6;
+    color: var(--gray);
+  }
+  .slide.light .body { color: #666; }
+
+  .accent { color: var(--coral); }
+
+  /* Header bar */
+  .slide-header {
+    position: absolute;
+    top: 3vh;
+    left: 6vw;
+    right: 6vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .slide-header .section-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: clamp(0.65rem, 1vw, 0.85rem);
+    color: var(--gray);
+  }
+  .slide-header .section-name::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--coral);
+    display: inline-block;
+  }
+  .slide-header .slide-num {
+    font-size: clamp(0.65rem, 1vw, 0.85rem);
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Footer bar */
+  .slide-footer {
+    position: absolute;
+    bottom: 3vh;
+    left: 6vw;
+    right: 6vw;
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+    color: var(--gray);
+  }
+
+  /* Two-column layouts */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3vw;
+    margin-top: 2em;
+  }
+  .col-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+    margin-bottom: 1em;
+  }
+  .slide.light .col-divider { background: #ddd; }
+
+  /* Lists */
+  .layer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6em 0;
+    border-bottom: 1px solid #eee;
+    font-size: clamp(0.75rem, 1.2vw, 1rem);
+  }
+  .layer-row.ours {
+    background: rgba(232, 84, 62, 0.08);
+    margin: 0 -1em;
+    padding: 0.6em 1em;
+    border-radius: 4px;
+  }
+  .layer-row .num {
+    font-style: italic;
+    width: 2em;
+    color: var(--gray);
+  }
+  .layer-row.ours .num { color: var(--coral); }
+  .layer-row .label { flex: 1; }
+  .layer-row .badge {
+    font-size: 0.8em;
+    color: var(--gray);
+  }
+  .layer-row.ours .badge {
+    color: var(--coral);
+    font-weight: 600;
+  }
+
+  /* ABC items */
+  .abc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1em;
+    margin-bottom: 1.8em;
+  }
+  .abc-letter {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    color: var(--coral);
+    line-height: 1;
+    min-width: 1.2em;
+  }
+  .abc-content h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+    margin-bottom: 0.2em;
+  }
+  .abc-content p {
+    font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+    color: var(--light-gray);
+  }
+
+  /* Deliverable rows */
+  .deliv-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    padding: 0.5em 0;
+    border-top: 1px solid #eee;
+    font-size: clamp(0.75rem, 1.3vw, 1.05rem);
+  }
+  .deliv-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--coral);
+    min-width: 2em;
+  }
+
+  /* Timeline */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.8vw;
+    margin-top: 2em;
+  }
+  .week-card {
+    border-top: 2px solid #ddd;
+    padding-top: 0.8em;
+  }
+  .week-card.highlight { border-top-color: var(--coral); }
+  .week-card .wk {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.7rem, 1vw, 0.9rem);
+  }
+  .week-card.highlight .wk { color: var(--coral); }
+  .week-card .dates {
+    font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+    color: var(--gray);
+    margin-bottom: 0.5em;
+  }
+  .week-card .wk-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.75rem, 1.2vw, 1rem);
+    margin-bottom: 0.3em;
+  }
+  .week-card .wk-desc {
+    font-size: clamp(0.5rem, 0.8vw, 0.7rem);
+    color: var(--gray);
+    line-height: 1.4;
+  }
+
+  /* Team names */
+  .team-names {
+    display: flex;
+    gap: 4vw;
+    margin: 1.5em 0;
+  }
+  .team-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  /* Check list */
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.35em 0;
+    font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+  }
+  .check-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* Risk rows */
+  .risk-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    padding: 0.6em 0;
+    border-top: 1px solid #eee;
+    align-items: center;
+  }
+  .risk-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+  }
+  .risk-fix {
+    font-size: clamp(0.7rem, 1vw, 0.85rem);
+    color: #666;
+  }
+
+  /* Supervisors */
+  .supervisors {
+    border-top: 1px solid #eee;
+    padding-top: 1em;
+    margin-top: 1.5em;
+  }
+
+  /* Navigation dots */
+  .nav-dots {
+    position: fixed;
+    right: 2vw;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 100;
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    padding: 0;
+  }
+  .nav-dot.active {
+    background: var(--coral);
+    transform: scale(1.4);
+  }
+  .slide.light ~ .nav-dots .nav-dot,
+  .nav-dot.on-light {
+    background: rgba(0,0,0,0.15);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--coral);
+    transition: width 0.4s ease;
+    z-index: 200;
+  }
+
+  /* Keyboard hint */
+  .key-hint {
+    position: fixed;
+    bottom: 2vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.3);
+    z-index: 100;
+    transition: opacity 2s;
+  }
+
+  /* Animations */
+  .slide.active .fade-up {
+    animation: fadeUp 0.6s ease forwards;
+  }
+  .fade-up { opacity: 0; transform: translateY(15px); }
+  .d1 { animation-delay: 0.1s !important; }
+  .d2 { animation-delay: 0.2s !important; }
+  .d3 { animation-delay: 0.3s !important; }
+  .d4 { animation-delay: 0.4s !important; }
+  .d5 { animation-delay: 0.5s !important; }
+  .d6 { animation-delay: 0.6s !important; }
+  .d7 { animation-delay: 0.7s !important; }
+  .d8 { animation-delay: 0.8s !important; }
+  .d9 { animation-delay: 0.9s !important; }
+  .d10 { animation-delay: 1.0s !important; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .slide { padding: 8vh 8vw; }
+    .two-col { grid-template-columns: 1fr; }
+    .timeline { grid-template-columns: repeat(3, 1fr); gap: 1em; }
+    .team-names { flex-direction: column; gap: 0.5em; }
+    .risk-row { grid-template-columns: 1fr; gap: 0.3em; }
+    .nav-dots { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide dark active" data-bg="dark">
+    <div style="display:flex;justify-content:space-between;margin-bottom:auto;padding-top:1vh">
+      <span class="body" style="color:var(--light-gray);font-size:clamp(0.6rem,0.9vw,0.8rem)">USF · Center for Innovation, Technology & Aging</span>
+      <span class="body" style="color:var(--light-gray);font-size:clamp(0.6rem,0.9vw,0.8rem)">May 18, 2026</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="tag fade-up d1">Week 1 · Plans Presentation</div>
+      <h1 class="mega fade-up d2" style="margin-bottom:0.15em">Robotic O₂</h1>
+      <h1 class="mega fade-up d3" style="margin-bottom:0.15em">Generator</h1>
+      <h1 class="mega fade-up d4">Carrier.</h1>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:auto">
+      <div class="fade-up d5">
+        <div style="font-weight:600;font-size:clamp(0.7rem,1vw,0.9rem)">Team Odin</div>
+        <div class="body" style="color:var(--light-gray)">Olga · Aibek · Chi Vo</div>
+      </div>
+      <div class="fade-up d5" style="text-align:right">
+        <div class="body" style="color:var(--light-gray)">Supervisor: Dr. William Kearns</div>
+        <div class="body" style="color:var(--light-gray)">Hackathon: Prof. Yu Sun</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Brief -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">The brief</span>
+      <span class="slide-num">02 / 11</span>
+    </div>
+    <div class="tag fade-up d1">In one sentence</div>
+    <h2 class="mega fade-up d2" style="color:var(--black)">
+      Teach a quadruped robot to
+      <span class="accent">follow a person up and down stairs</span>
+      while carrying an oxygen generator.
+    </h2>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>01 · Brief</span></div>
+  </div>
+
+  <!-- SLIDE 3: Scope -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Scope</span>
+      <span class="slide-num">03 / 11</span>
+    </div>
+    <div class="tag fade-up d1">Where we plug in</div>
+    <h2 class="big fade-up d2" style="color:var(--black);margin-bottom:0.8em">
+      The robot already walks and follows on flat ground. <span class="accent">Stairs are the gap.</span>
+    </h2>
+    <div class="two-col fade-up d3">
+      <div>
+        <div class="col-divider"></div>
+        <div class="tag" style="color:#999;margin-bottom:0.8em">Already built</div>
+        <div style="font-size:clamp(0.8rem,1.2vw,1rem);line-height:2;color:var(--black)">
+          Unitree Go2 quadruped<br>
+          RGB-D + 3D LiDAR<br>
+          Flat-ground following<br>
+          MPPI Controller
+        </div>
+      </div>
+      <div>
+        <div class="col-divider" style="background:var(--coral)"></div>
+        <div class="tag" style="margin-bottom:0.8em">Our 6-week scope</div>
+        <div style="font-size:clamp(0.8rem,1.2vw,1rem);line-height:2;color:var(--black)">
+          Stair detection<br>
+          Stair-aware gait switch<br>
+          2 ft following on stairs<br>
+          Payload &lt; 8 lb stability
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>02 · Scope</span></div>
+  </div>
+
+  <!-- SLIDE 4: The Work -->
+  <div class="slide dark" data-bg="dark">
+    <div class="slide-header">
+      <span class="section-name">The work</span>
+      <span class="slide-num">04 / 11</span>
+    </div>
+    <div class="tag fade-up d1">Three things to solve</div>
+    <div style="margin-top:1em">
+      <div class="abc-item fade-up d2">
+        <span class="abc-letter">A</span>
+        <div class="abc-content">
+          <h3>See the staircase.</h3>
+          <p>Detect stair geometry from fused RGB-D + LiDAR.</p>
+        </div>
+      </div>
+      <div class="abc-item fade-up d3">
+        <span class="abc-letter">B</span>
+        <div class="abc-content">
+          <h3>Switch the gait.</h3>
+          <p>Walk → climb at the right moment. Then back.</p>
+        </div>
+      </div>
+      <div class="abc-item fade-up d4">
+        <span class="abc-letter">C</span>
+        <div class="abc-content">
+          <h3>Hold the 2 ft gap.</h3>
+          <p>Stay close — but not too close — through vertical motion.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>03 · The work</span></div>
+  </div>
+
+  <!-- SLIDE 5: Architecture -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Architecture</span>
+      <span class="slide-num">05 / 11</span>
+    </div>
+    <div class="tag fade-up d1">System layers</div>
+    <h2 class="big fade-up d2" style="color:var(--black);margin-bottom:0.8em">From sensors to a foot on a step.</h2>
+    <div class="fade-up d3">
+      <div class="layer-row"><span class="num">01</span><span class="label">RGB-D · 3D LiDAR · sensor fusion</span><span class="badge">existing</span></div>
+      <div class="layer-row"><span class="num">02</span><span class="label">Person tracking</span><span class="badge">existing</span></div>
+      <div class="layer-row ours"><span class="num">03</span><span class="label">Stair detection & geometry</span><span class="badge">our work</span></div>
+      <div class="layer-row ours"><span class="num">04</span><span class="label">Stair-aware follow + 2 ft controller</span><span class="badge">our work</span></div>
+      <div class="layer-row ours"><span class="num">05</span><span class="label">Walk ↔ climb gait switching</span><span class="badge">our work</span></div>
+      <div class="layer-row"><span class="num">06</span><span class="label">Go2 locomotion · payload mockup</span><span class="badge">existing</span></div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>04 · Architecture</span></div>
+  </div>
+
+  <!-- SLIDE 6: Deliverables -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Final deliverables</span>
+      <span class="slide-num">06 / 11</span>
+    </div>
+    <div class="tag fade-up d1">What we ship by Jun 29</div>
+    <h2 class="big fade-up d2" style="color:var(--black);margin-bottom:0.8em">Five artifacts. Each demo-able on its own.</h2>
+    <div class="fade-up d3">
+      <div class="deliv-row"><span class="deliv-num">01</span><span>Stair-following demo on the Go2</span></div>
+      <div class="deliv-row"><span class="deliv-num">02</span><span>Stair-perception ROS 2 module</span></div>
+      <div class="deliv-row"><span class="deliv-num">03</span><span>Stair-aware follow-policy patch</span></div>
+      <div class="deliv-row"><span class="deliv-num">04</span><span>Isaac Sim test scene</span></div>
+      <div class="deliv-row"><span class="deliv-num">05</span><span>Technical write-up + demo video</span></div>
+      <div class="deliv-row" style="border-top:1px solid #eee"></div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>05 · Deliverables</span></div>
+  </div>
+
+  <!-- SLIDE 7: Plan -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Six-week plan</span>
+      <span class="slide-num">07 / 11</span>
+    </div>
+    <div class="tag fade-up d1">May 18 → Jun 29</div>
+    <h2 class="big fade-up d2" style="color:var(--black);margin-bottom:0.6em">One shippable thing every Friday.</h2>
+    <div class="timeline fade-up d3">
+      <div class="week-card">
+        <div class="wk">W1</div><div class="dates">May 18–24</div>
+        <div class="wk-title">Kickoff & research</div>
+        <div class="wk-desc">Repo, dev env, study existing codebase & approaches.</div>
+      </div>
+      <div class="week-card">
+        <div class="wk">W2</div><div class="dates">May 25–31</div>
+        <div class="wk-title">Research & sim setup</div>
+        <div class="wk-desc">RL vs classical approaches. Set up simulation with Go2 model.</div>
+      </div>
+      <div class="week-card">
+        <div class="wk">W3</div><div class="dates">Jun 1–7</div>
+        <div class="wk-title">Stair perception</div>
+        <div class="wk-desc">Detect target staircase geometry using head camera.</div>
+      </div>
+      <div class="week-card highlight">
+        <div class="wk">W4</div><div class="dates">Jun 8–14</div>
+        <div class="wk-title">Gait switching</div>
+        <div class="wk-desc">First end-to-end sim climb. Mid-point check.</div>
+      </div>
+      <div class="week-card">
+        <div class="wk">W5</div><div class="dates">Jun 15–21</div>
+        <div class="wk-title">Hardware bring-up</div>
+        <div class="wk-desc">Deploy on Go2. Tune the 2 ft gap on target stairs.</div>
+      </div>
+      <div class="week-card highlight">
+        <div class="wk">W6</div><div class="dates">Jun 22–29</div>
+        <div class="wk-title">Demo & write-up</div>
+        <div class="wk-desc">Final demo Jun 29. Video + report.</div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>06 · Plan</span></div>
+  </div>
+
+  <!-- SLIDE 8: Team -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Team</span>
+      <span class="slide-num">08 / 11</span>
+    </div>
+    <div class="tag fade-up d1">The three of us</div>
+    <div class="team-names">
+      <span class="team-name fade-up d2" style="color:var(--black)">Olga</span>
+      <span class="team-name fade-up d3" style="color:var(--black)">Aibek</span>
+      <span class="team-name fade-up d4" style="color:var(--black)">Chi Vo</span>
+    </div>
+    <div class="supervisors fade-up d5">
+      <div class="tag" style="color:#999">Supervisors</div>
+      <div style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(0.9rem,1.4vw,1.1rem);color:var(--black);margin-bottom:0.3em">
+        Dr. William Kearns · Prof. Yu Sun
+      </div>
+      <div class="body">
+        Juan Ricardo Wilches · Hieu Tran · Temirzhan Mukhambet · Rice Pham · Khanh Quoc Duong
+      </div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>07 · Team</span></div>
+  </div>
+
+  <!-- SLIDE 9: Status -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">What we did this week</span>
+      <span class="slide-num">09 / 11</span>
+    </div>
+    <div class="tag fade-up d1">Week 1 Completed</div>
+    <h2 class="big fade-up d2" style="color:var(--black);margin-bottom:0.8em">Everything in Done.</h2>
+    <div>
+      <div class="check-item fade-up d3"><span class="check-dot"></span>Created GitHub org (robotic-o2-team) and repo with project structure</div>
+      <div class="check-item fade-up d4"><span class="check-dot"></span>Set up Sprint Board — 5 issues created, tracked, and completed</div>
+      <div class="check-item fade-up d5"><span class="check-dot"></span>Studied project abstract and understood system architecture</div>
+      <div class="check-item fade-up d6"><span class="check-dot"></span>Met with Dr. Kearns — clarified project scope and requirements</div>
+      <div class="check-item fade-up d7"><span class="check-dot"></span>Contacted teammates, exchanged contacts, shared GitHub access</div>
+      <div class="check-item fade-up d8"><span class="check-dot"></span>Researched related work and existing codebase</div>
+      <div class="check-item fade-up d9"><span class="check-dot"></span>Set up development environments on all machines</div>
+      <div class="check-item fade-up d10"><span class="check-dot"></span>Prepared and delivered this presentation</div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>08 · Status</span></div>
+  </div>
+
+  <!-- SLIDE 10: Risks -->
+  <div class="slide light" data-bg="light">
+    <div class="slide-header">
+      <span class="section-name">Risks</span>
+      <span class="slide-num">10 / 11</span>
+    </div>
+    <div class="tag fade-up d1">What could derail us</div>
+    <div class="fade-up d2">
+      <div class="risk-row"><span class="risk-name">Hardware access slips</span><span class="risk-fix">Sim-first. Hardware in W5–6.</span></div>
+      <div class="risk-row"><span class="risk-name">Single staircase scope</span><span class="risk-fix">Optimize for one target staircase first. Generalize later.</span></div>
+      <div class="risk-row"><span class="risk-name">Payload shifts balance</span><span class="risk-fix">Mass-on / mass-off tests each milestone.</span></div>
+      <div class="risk-row"><span class="risk-name">2 ft gap is tight</span><span class="risk-fix">Conservative speed. "Hold & signal" fallback.</span></div>
+      <div class="risk-row"><span class="risk-name">Team is part-time</span><span class="risk-fix">Friday demo cadence. GitHub-tracked.</span></div>
+      <div class="risk-row" style="border-top:1px solid #eee"></div>
+    </div>
+    <div class="slide-footer"><span>USF Hackathon 2026</span><span>09 · Risks</span></div>
+  </div>
+
+  <!-- SLIDE 11: Closing -->
+  <div class="slide coral-bg" data-bg="coral">
+    <div style="display:flex;justify-content:space-between;margin-bottom:auto;padding-top:1vh">
+      <span style="font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(255,255,255,0.8)">Thank you</span>
+      <span style="font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(255,255,255,0.6)">11 / 11</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+      <div class="tag fade-up d1" style="color:rgba(0,0,0,0.4)">Questions?</div>
+      <h2 class="mega fade-up d2">A robot dog.</h2>
+      <h2 class="mega fade-up d3">A flight of stairs.</h2>
+      <h2 class="mega fade-up d4">Six weeks.</h2>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:auto">
+      <span class="fade-up d5" style="font-weight:600;font-size:clamp(0.7rem,1vw,0.85rem)">github.com/robotic-o2-team</span>
+      <span class="fade-up d5" style="font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(255,255,255,0.8)">Next milestone · Week 2: Research & sim setup</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Nav dots -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- Keyboard hint -->
+<div class="key-hint" id="hint">← → or click to navigate</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const navDots = document.getElementById('navDots');
+  const hint = document.getElementById('hint');
+  let current = 0;
+
+  // Build nav dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    navDots.appendChild(dot);
+  });
+
+  function goTo(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    // Reset animations
+    slides[current].querySelectorAll('.fade-up').forEach(el => {
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = '';
+    });
+    current = n;
+    slides[current].classList.add('active');
+    
+    // Update progress
+    progress.style.width = ((current / (slides.length - 1)) * 100) + '%';
+    
+    // Update dots
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+
+    // Update dot colors based on slide bg
+    const bg = slides[current].dataset.bg;
+    document.querySelectorAll('.nav-dot').forEach(d => {
+      d.classList.toggle('on-light', bg === 'light');
+    });
+
+    // Hide hint
+    hint.style.opacity = '0';
+  }
+
+  // Keyboard nav
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+  });
+
+  // Touch/swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+
+  // Click to advance (left third = back, rest = forward)
+  document.addEventListener('click', e => {
+    if (e.target.closest('.nav-dots') || e.target.closest('a')) return;
+    const x = e.clientX / window.innerWidth;
+    x < 0.33 ? goTo(current - 1) : goTo(current + 1);
+  });
+
+  // Init
+  goTo(0);
+</script>
+
+</body>
+</html>
