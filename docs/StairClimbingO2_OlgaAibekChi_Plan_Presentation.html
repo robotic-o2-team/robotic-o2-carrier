@@ -462,7 +462,7 @@
           Unitree Go2 quadruped<br>
           RGB-D + 3D LiDAR<br>
           Flat-ground following<br>
-          MPPI Controller
+          Tubing-management arm
         </div>
       </div>
       <div>
@@ -561,18 +561,18 @@
     <div class="timeline fade-up d3">
       <div class="week-card">
         <div class="wk">W1</div><div class="dates">May 18–24</div>
-        <div class="wk-title">Kickoff & research</div>
-        <div class="wk-desc">Repo, dev env, study existing codebase & approaches.</div>
+        <div class="wk-title">Kickoff & setup</div>
+        <div class="wk-desc">Repo, board, dev env on 3 machines.</div>
       </div>
       <div class="week-card">
         <div class="wk">W2</div><div class="dates">May 25–31</div>
-        <div class="wk-title">Research & sim setup</div>
-        <div class="wk-desc">RL vs classical approaches. Set up simulation with Go2 model.</div>
+        <div class="wk-title">Sensor baseline</div>
+        <div class="wk-desc">Bring up sensors, reproduce flat-ground follow.</div>
       </div>
       <div class="week-card">
         <div class="wk">W3</div><div class="dates">Jun 1–7</div>
         <div class="wk-title">Stair perception</div>
-        <div class="wk-desc">Detect target staircase geometry using head camera.</div>
+        <div class="wk-desc">Geometry detection, sim test scene v1.</div>
       </div>
       <div class="week-card highlight">
         <div class="wk">W4</div><div class="dates">Jun 8–14</div>
@@ -582,7 +582,7 @@
       <div class="week-card">
         <div class="wk">W5</div><div class="dates">Jun 15–21</div>
         <div class="wk-title">Hardware bring-up</div>
-        <div class="wk-desc">Deploy on Go2. Tune the 2 ft gap on target stairs.</div>
+        <div class="wk-desc">Deploy on Go2. Tune the 2 ft gap.</div>
       </div>
       <div class="week-card highlight">
         <div class="wk">W6</div><div class="dates">Jun 22–29</div>
@@ -647,7 +647,7 @@
     <div class="tag fade-up d1">What could derail us</div>
     <div class="fade-up d2">
       <div class="risk-row"><span class="risk-name">Hardware access slips</span><span class="risk-fix">Sim-first. Hardware in W5–6.</span></div>
-      <div class="risk-row"><span class="risk-name">Single staircase scope</span><span class="risk-fix">Optimize for one target staircase first. Generalize later.</span></div>
+      <div class="risk-row"><span class="risk-name">Stairs vary a lot</span><span class="risk-fix">Parametric Isaac Sim staircase.</span></div>
       <div class="risk-row"><span class="risk-name">Payload shifts balance</span><span class="risk-fix">Mass-on / mass-off tests each milestone.</span></div>
       <div class="risk-row"><span class="risk-name">2 ft gap is tight</span><span class="risk-fix">Conservative speed. "Hold & signal" fallback.</span></div>
       <div class="risk-row"><span class="risk-name">Team is part-time</span><span class="risk-fix">Friday demo cadence. GitHub-tracked.</span></div>
@@ -670,7 +670,7 @@
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:auto">
       <span class="fade-up d5" style="font-weight:600;font-size:clamp(0.7rem,1vw,0.85rem)">github.com/robotic-o2-team</span>
-      <span class="fade-up d5" style="font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(255,255,255,0.8)">Next milestone · Week 2: Research & sim setup</span>
+      <span class="fade-up d5" style="font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(255,255,255,0.8)">Next milestone · Week 2: Sensor baseline</span>
     </div>
   </div>
 
